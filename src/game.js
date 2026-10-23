@@ -1418,6 +1418,14 @@
 
     loop();
     window.SNAKE.ready = true;
+
+    var bootEl = document.getElementById('boot');
+    if (bootEl) {
+      bootEl.classList.add('done');
+      setTimeout(function () {
+        if (bootEl.parentNode) bootEl.parentNode.removeChild(bootEl);
+      }, 600);
+    }
   }
 
   function loop() {

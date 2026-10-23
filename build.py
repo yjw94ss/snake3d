@@ -6,7 +6,6 @@ import os
 import re
 import subprocess
 import sys
-import tempfile
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 
@@ -45,20 +44,14 @@ def main():
                 "url(http", "@import", "//unpkg", "//cdn"):
         assert pat not in out, "external ref found: " + pat
 
-    # 4) JS 语法检查（写系统临时目录，不在仓库里留产物）
-    fd, tmp = tempfile.mkstemp(suffix=".js")
-    try:
-        with os.fdopen(fd, "w", encoding="utf-8") as f:
-            f.write(game)
-        r = subprocess.run(["node", "--check", tmp], capture_output=True, text=True)
-        if r.returncode != 0:
-            sys.stderr.write(r.stderr)
-            raise SystemExit("game.js 语法错误")
-    finally:
-        try:
-            os.unlink(tmp)
-        except OSError:
-            pass
+    # 4) JS 语法检查
+    tmp = os.path.join(BASE, "qa", "_game_check.js")
+    os.makedirs(os.path.dirname(tmp), exist_ok=True)
+    write("qa/_game_check.js", game)
+    r = subprocess.run(["node", "--check", tmp], capture_output=True, text=True)
+    if r.returncode != 0:
+        sys.stderr.write(r.stderr)
+        raise SystemExit("game.js 语法错误")
 
     out_path = os.path.join(BASE, "index.html")
     write("index.html", out)

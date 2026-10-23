@@ -7,6 +7,37 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>3D 贪吃蛇 · 小小探险</title>
 <style>
+/* ============ 启动遮罩（纯 CSS，先于脚本渲染） ============ */
+#boot {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  background: linear-gradient(180deg, #9edcf9 0%, #cbeeb0 70%, #9ede74 100%);
+  transition: opacity .45s ease;
+}
+#boot.done { opacity: 0; pointer-events: none; }
+.boot-ring {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 5px solid rgba(255, 255, 255, .65);
+  border-top-color: #2fbb63;
+  border-right-color: #2fbb63;
+  animation: bootspin .85s linear infinite;
+}
+@keyframes bootspin { to { transform: rotate(360deg); } }
+.boot-text {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #2c6b41;
+  letter-spacing: .6px;
+}
+
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
 html, body {
@@ -399,6 +430,11 @@ body.touch #pad { display: grid; }
 </style>
 </head>
 <body>
+<div id="boot">
+  <div class="boot-ring"></div>
+  <div class="boot-text">正在叫醒小蛇…</div>
+</div>
+
 <canvas id="c"></canvas>
 
 <!-- ================= HUD ================= -->
@@ -1966,6 +2002,14 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
 
     loop();
     window.SNAKE.ready = true;
+
+    var bootEl = document.getElementById('boot');
+    if (bootEl) {
+      bootEl.classList.add('done');
+      setTimeout(function () {
+        if (bootEl.parentNode) bootEl.parentNode.removeChild(bootEl);
+      }, 600);
+    }
   }
 
   function loop() {
